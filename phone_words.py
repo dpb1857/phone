@@ -17,9 +17,13 @@ L = {'0': '0',
 # Generate the words we can make from a phone number using list comprehensions;
 def words1(P):
 
-    # For actual phone numbers, just extend this expression through 'for l6 in L[P[6]]';
+    # For actual phone numbers, just extend this expression through 'for letter6 in L[P[6]]';
     # Truncated here so we can visually check the result;
-    return [''.join((l0,l1,l2)) for l0 in L[P[0]] for l1 in L[P[1]] for l2 in L[P[2]]]
+    #
+    # This is straightword, but has the disadvantage that we're generating the entire list 
+    # in memory before we return it;
+
+    return [''.join((letter0,letter1,letter2)) for letter0 in L[P[0]] for letter1 in L[P[1]] for letter2 in L[P[2]]]
 
 def words2(P):
     """
@@ -51,7 +55,11 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         usage()
 
-    # print words1(sys.argv[1])
-    for word in gen_words(sys.argv[1]):
+    if False:
+        wordfunc = words1(sys.argv[1])
+
+    if True:
+        wordfunc = gen_words(sys.argv[1])
+
+    for word in wordfunc:
         print word
-    
