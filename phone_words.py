@@ -44,7 +44,7 @@ def words2(P):
     if P == '':
         yield ''
     else: # Ha! Protect this in an 'else' clause, or we'll be back here even after we've yielded the empty string!
-        for word in (ch+words for ch in L[P[0]] for words in words2(P[1:])):
+       for word in (word+ch for word in words2(P[:-1]) for ch in L[P[-1]]):
             yield word
 
 def gen_words(P):
@@ -54,7 +54,7 @@ def gen_words(P):
     'ch' iterates through the possible values for the first letter based on the digit P[0].
     Attach that letter to the start of each possible word we can create from the remaining digits.
     """
-    return (ch+word for ch in L[P[0]] for word in gen_words(P[1:])) if P else ['']
+    return (word+ch for word in gen_words(P[:-1]) for ch in L[P[-1]]) if P else ['']
 
 def itertools_words(P):
     """
@@ -90,7 +90,7 @@ if __name__ == "__main__":
     # wordgen = words0(sys.argv[1])
     # wordgen = words1(sys.argv[1])
     # wordgen = words2(sys.argv[1])
-    # wordgen = gen_words(sys.argv[1])
+    wordgen = gen_words(sys.argv[1])
     # wordgen = itertools_words(sys.argv[1])
     wordgen = itertools_terse(sys.argv[1])
 
