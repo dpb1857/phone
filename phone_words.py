@@ -36,6 +36,21 @@ def words1(P):
     # For actual phone numbers, just extend this expression until you get to 'for ch6 in L[P[6]]';
     return [''.join((ch0,ch1,ch2)) for ch0 in L[P[0]] for ch1 in L[P[1]] for ch2 in L[P[2]]]
 
+def words_recursive(P):
+    """
+    A traditional recursive solution.
+    """
+    if not P:
+        return ['']
+
+    words = []
+    # Do the recursion in the outer loop;
+    for word in words_recursive(P[:-1]):
+        for ch in L[P[-1]]:
+            words.append(word+ch)
+            
+    return words
+
 def words2(P):
     """
     Yields one word at a time by stripping the leading digit, then taking its characters
@@ -89,10 +104,11 @@ if __name__ == "__main__":
 
     # wordgen = words0(sys.argv[1])
     # wordgen = words1(sys.argv[1])
+    wordgen = words_recursive(sys.argv[1])
     # wordgen = words2(sys.argv[1])
-    wordgen = gen_words(sys.argv[1])
+    # wordgen = gen_words(sys.argv[1])
     # wordgen = itertools_words(sys.argv[1])
-    wordgen = itertools_terse(sys.argv[1])
+    # wordgen = itertools_terse(sys.argv[1])
 
     for word in wordgen:
         print word
