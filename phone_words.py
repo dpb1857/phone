@@ -1,7 +1,14 @@
 #!/usr/bin/env python
 
-import sys
+"""
+Script to demonstrate techniques for mapping phone numbers to words.
+"""
 
+# pylint: disable=invalid-name,line-too-long
+
+import argparse
+
+# Map phone key to the symbols it represents
 L = {'0': '0',
      '1': '1',
      '2': 'abc',
@@ -12,29 +19,37 @@ L = {'0': '0',
      '7': 'prs',
      '8': 'tuv',
      '9': 'wxy'
-     }
+    }
 
-
-def words0(P):
+def wordsNestedLoops(P):
     """
+    Generate words via nested 'for' loops.
+
     Sometimes, you can try too hard to be clever when obvious
     and straightforward will solve the problem as specified...
     """
+    if len(P) < 3:
+        raise Exception("min ph# length is 3 for nested loop version")
+
     for ch0 in L[P[0]]:
         for ch1 in L[P[1]]:
             for ch2 in L[P[2]]:
                 # Keep nesting if you realy want reults for all 7 letter...
                 yield ''.join((ch0, ch1, ch2)) # ,ch3, ch4, ch5, ch6
 
-def words1(P):
+def wordsListComp(P):
     """
+    Generate words via list comprehensions.
+
     Kind of like the nested loops in words0, except it generates a big list of
     all of the values before returning; Syntatically concise. If actually extended
     for all 7 digits of a phone number, it would be awkward to read...
     """
+    if len(P) < 3:
+        raise Exception("min ph# length is 3 for nested loop version")
 
     # For actual phone numbers, just extend this expression until you get to 'for ch6 in L[P[6]]';
-    return [''.join((ch0,ch1,ch2)) for ch0 in L[P[0]] for ch1 in L[P[1]] for ch2 in L[P[2]]]
+    return [''.join((ch0, ch1, ch2)) for ch0 in L[P[0]] for ch1 in L[P[1]] for ch2 in L[P[2]]]
 
 def words_recursive(P):
     """
@@ -48,41 +63,43 @@ def words_recursive(P):
     for word in words_recursive(P[:-1]):
         for ch in L[P[-1]]:
             words.append(word+ch)
-            
+
     return words
 
-def words2(P):
+def words_gen1(P):
     """
     Yields one word at a time by stripping the leading digit, then taking its characters
     and joining them to the front of all the possible words from the remaining digits (P[1:]).
     """
     if P == '':
         yield ''
-    else: # Ha! Protect this in an 'else' clause, or we'll be back here even after we've yielded the empty string!
-       for word in (word+ch for word in words2(P[:-1]) for ch in L[P[-1]]):
-            yield word
+        return
 
-def gen_words(P):
+    for word in (word+ch for word in words_gen1(P[:-1]) for ch in L[P[-1]]):
+        yield word
+
+def words_gen2(P):
     """
-    Create a set of nested generators to compute the phone words.
+    Create a set of nested generators to compute the phone words; this time a one-liner.
 
     'ch' iterates through the possible values for the first letter based on the digit P[0].
     Attach that letter to the start of each possible word we can create from the remaining digits.
     """
-    return (word+ch for word in gen_words(P[:-1]) for ch in L[P[-1]]) if P else ['']
+    return (word+ch for word in words_gen2(P[:-1]) for ch in L[P[-1]]) if P else ['']
 
-def itertools_words(P):
+def words_itertools(P):
     """
     Dump the real work onto the std library itertools module;
     """
     from itertools import product, starmap
 
     letter_list = [L[i] for i in P]                             # '232' => ['abc', 'def', 'abc']
+    # pylint: disable=star-args
     letter_combinations = product(*letter_list)                 # yields ('a','d','a'), ('a','d','b'), ...
     words = starmap(lambda *x: ''.join(x), letter_combinations) # join the letters of the tuples;
     return words
 
-def itertools_terse(P):
+def words_itertools_terse(P):
     """
     Same as itertools_words() but as a one-liner...
     """
@@ -90,25 +107,38 @@ def itertools_terse(P):
 
     return starmap(lambda *x: ''.join(x), product(*[L[i] for i in P]))
 
+def main():
+    "main function body"
 
-def usage():
+    parser = argparse.ArgumentParser(description="Phone Number Word Generator")
+    parser.add_argument("method", choices=["recursive", "nestedloops", "listcomp", "gen1", "gen2", "iter", "iterterse"])
+    parser.add_argument("number", help="Phone number")
+    args = parser.parse_args()
 
-    print >> sys.stderr, "Usage: %s <phone-number>" % sys.argv[0]
-    sys.exit(1)
+    if args.method == "recursive":
+        wordgen = words_recursive(args.number)
 
+    elif args.method == "nestedloops":
+        wordgen = wordsNestedLoops(args.number)
 
-if __name__ == "__main__":
+    elif args.method == "listcomp":
+        wordgen = wordsListComp(args.number)
 
-    if len(sys.argv) < 2:
-        usage()
+    elif args.method == "gen1":
+        wordgen = words_gen1(args.number)
 
-    # wordgen = words0(sys.argv[1])
-    # wordgen = words1(sys.argv[1])
-    wordgen = words_recursive(sys.argv[1])
-    # wordgen = words2(sys.argv[1])
-    # wordgen = gen_words(sys.argv[1])
-    # wordgen = itertools_words(sys.argv[1])
-    # wordgen = itertools_terse(sys.argv[1])
+    elif args.method == "gen2":
+        wordgen = words_gen2(args.number)
+
+    elif args.method == "iter":
+        wordgen = words_itertools(args.number)
+
+    elif args.method == "iterterse":
+        wordgen = words_itertools_terse(args.number)
 
     for word in wordgen:
         print word
+
+
+if __name__ == "__main__":
+    main()
