@@ -1,0 +1,23 @@
+
+Even now, this builds for me after doing:
+
+  apt-get install libxext-dev xutils-dev
+
+To build:
+
+1)  Run the program 'xmkmf' to generate the makefile;
+
+2)  Type 'make';
+
+That's all. You should now be able to run 'puzzle'.
+Type:
+
+    puzzle --help
+
+for help.
+
+
+The options for dealing with scrambling pixmaps no longer
+do their thing, to bring them up to date we should link
+with an image library to load an image file into a pixmap
+and *then* play our games with the tiles.
